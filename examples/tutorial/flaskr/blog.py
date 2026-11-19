@@ -4,6 +4,12 @@ from werkzeug.exceptions import abort
 from .auth import login_required
 from .models import Post, db
 
+import os
+
+from flask import current_app
+
+from .uploads import save_upload
+
 bp = Blueprint("blog", __name__)
 
 
@@ -32,14 +38,24 @@ def create():
         title = request.form["title"]
         body = request.form["body"]
         error = None
+        image_name = None
 
         if not title:
             error = "Title is required."
 
+        if error is None:
+            try:
+                image_name = save_upload(request.files.get("imagem_post"))
+            except ValueError as e:
+                error = str(e)
+
         if error is not None:
             flash(error)
         else:
-            db.session.add(Post(title=title, body=body, author_id=g.user.id))
+            db.session.add(
+                Post(title=title, body=body, author_id=g.user.id,
+                     imagem_post=image_name)
+            )
             db.session.commit()
             return redirect(url_for("blog.index"))
 
@@ -55,15 +71,31 @@ def update(id):
         title = request.form["title"]
         body = request.form["body"]
         error = None
+        new_image = None
 
         if not title:
             error = "Title is required."
+
+        if error is None:
+            try:
+                new_image = save_upload(request.files.get("imagem_post"))
+            except ValueError as e:
+                error = str(e)
 
         if error is not None:
             flash(error)
         else:
             post.title = title
             post.body = body
+            if new_image:
+                # apaga a imagem antiga e guarda a nova
+                if post.imagem_post:
+                    old = os.path.join(
+                        current_app.config["UPLOAD_FOLDER"], post.imagem_post
+                    )
+                    if os.path.exists(old):
+                        os.remove(old)
+                post.imagem_post = new_image
             db.session.commit()
             return redirect(url_for("blog.index"))
 

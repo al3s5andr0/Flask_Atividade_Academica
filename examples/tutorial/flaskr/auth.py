@@ -1,5 +1,7 @@
 import functools
 
+from .uploads import save_upload
+
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
@@ -32,6 +34,7 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
         error = None
+        avatar_name = None
 
         if not username:
             error = "Username is required."
@@ -41,7 +44,17 @@ def register():
             error = f"User {username} is already registered."
 
         if error is None:
-            user = User(username=username, password=generate_password_hash(password))
+            try:
+                avatar_name = save_upload(request.files.get("avatar"))
+            except ValueError as e:
+                error = str(e)
+
+        if error is None:
+            user = User(
+                username=username,
+                password=generate_password_hash(password),
+                avatar=avatar_name,
+            )
             db.session.add(user)
             db.session.commit()
             return redirect(url_for("auth.login"))

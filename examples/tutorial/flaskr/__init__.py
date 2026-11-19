@@ -12,6 +12,8 @@ def create_app(test_config=None):
         SQLALCHEMY_DATABASE_URI="sqlite:///"
         + os.path.join(app.instance_path, "flaskr.sqlite"),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        UPLOAD_FOLDER=os.path.join(app.root_path, "static", "uploads"),
+        MAX_CONTENT_LENGTH=5 * 1024 * 1024,
     )
 
     if test_config is None:
@@ -24,7 +26,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # inicializa a extensão e cria as tabelas a partir dos modelos
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
     db.init_app(app)
     with app.app_context():
         db.create_all()
