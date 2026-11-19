@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1 class="h3">{% block title %}Painel financeiro{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  {% if erro %}
+    <div class="alert alert-danger">{{ erro }}</div>
+  {% endif %}
+
+  <div class="row g-4">
+
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-dark text-white">Cálculo de IRPF</div>
+        <div class="card-body">
+          <form method="post">
+            <input type="hidden" name="ferramenta" value="irpf">
+            <label for="salario_bruto" class="form-label">Salário bruto (R$)</label>
+            <input type="number" class="form-control mb-3" name="salario_bruto"
+                   id="salario_bruto" step="0.01" min="0" required>
+            <button type="submit" class="btn btn-primary">Calcular IRPF</button>
+          </form>
+
+          {% if resultado and resultado.tipo == 'irpf' %}
+            <hr>
+            <p class="mb-1">Salário bruto: R$ {{ resultado.salario }}</p>
+            <p class="mb-1">Alíquota da faixa: {{ resultado.aliquota }}%</p>
+            <p class="mb-1">Redução 2026: R$ {{ resultado.reducao }}</p>
+            <p class="fw-bold mb-0">Desconto estimado: R$ {{ resultado.imposto }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-dark text-white">Rescisão: 13º proporcional</div>
+        <div class="card-body">
+          <form method="post">
+            <input type="hidden" name="ferramenta" value="rescisao">
+            <label for="salario_base" class="form-label">Salário base (R$)</label>
+            <input type="number" class="form-control mb-3" name="salario_base"
+                   id="salario_base" step="0.01" min="0" required>
+            <label for="meses" class="form-label">Meses trabalhados (1 a 12)</label>
+            <input type="number" class="form-control mb-3" name="meses"
+                   id="meses" min="1" max="12" required>
+            <button type="submit" class="btn btn-primary">Calcular 13º</button>
+          </form>
+
+          {% if resultado and resultado.tipo == 'rescisao' %}
+            <hr>
+            <p class="mb-1">Salário base: R$ {{ resultado.salario }}</p>
+            <p class="mb-1">Meses: {{ resultado.meses }}</p>
+            <p class="fw-bold mb-0">13º proporcional: R$ {{ resultado.decimo }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

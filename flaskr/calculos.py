@@ -87,4 +87,4 @@ def painel():
         except (ValueError, ArithmeticError, KeyError) as e:
             erro = str(e) or "Valor inválido. Confira os campos."
 
-    return render_template("calculos/painel.html", resultado=resultado, erro=erro)
+            return render_template("calculos/index.html", resultado=resultado, erro=erro)

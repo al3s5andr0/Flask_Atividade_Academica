@@ -1,36 +1,52 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Posts{% endblock %}</h1>
-  {% if g.user %}
-    <a class="action" href="{{ url_for('blog.create') }}">New</a>
-  {% endif %}
+  <div class="d-flex justify-content-between align-items-center">
+    <h1 class="h3 mb-0">{% block title %}Posts{% endblock %}</h1>
+    {% if g.user %}
+      <a class="btn btn-primary" href="{{ url_for('blog.create') }}">Novo post</a>
+    {% endif %}
+  </div>
 {% endblock %}
 
 {% block content %}
-  {% for post in posts %}
-    <article class="post">
-      <header>
-        {% if post.author.avatar %}
-  <img src="{{ url_for('static', filename='uploads/' + post.author.avatar) }}"
-       alt="avatar" width="40">
-{% endif %}
-        <div>
-          <h1>{{ post['title'] }}</h1>
-          <div class="about">by {{ post['username'] }} on {{ post['created'].strftime('%Y-%m-%d') }}</div>
+  {% if not posts %}
+    <div class="alert alert-info">Nenhum post ainda.</div>
+  {% endif %}
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for post in posts %}
+      <div class="col">
+        <div class="card shadow-sm h-100">
+          {% if post.imagem_post %}
+            <img src="{{ url_for('static', filename='uploads/' + post.imagem_post) }}"
+                 class="card-img-top" alt="Imagem do post"
+                 style="height: 200px; object-fit: cover;">
+          {% endif %}
+
+          <div class="card-body">
+            <h5 class="card-title">{{ post.title }}</h5>
+            <p class="card-text">{{ post.body }}</p>
+          </div>
+
+          <div class="card-footer bg-white d-flex align-items-center">
+            {% if post.author.avatar %}
+              <img src="{{ url_for('static', filename='uploads/' + post.author.avatar) }}"
+                   alt="avatar" class="rounded-circle me-2"
+                   width="32" height="32" style="object-fit: cover;">
+            {% endif %}
+            <small class="text-muted">
+              {{ post.author.username }}<br>
+              {{ post.created.strftime('%d/%m/%Y %H:%M') }}
+            </small>
+
+            {% if g.user and g.user.id == post.author_id %}
+              <a class="btn btn-sm btn-outline-secondary ms-auto"
+                 href="{{ url_for('blog.update', id=post.id) }}">Editar</a>
+            {% endif %}
+          </div>
         </div>
-        {% if g.user['id'] == post['author_id'] %}
-          <a class="action" href="{{ url_for('blog.update', id=post['id']) }}">Edit</a>
-        {% endif %}
-      </header>
-      {% if post.imagem_post %}
-  <img src="{{ url_for('static', filename='uploads/' + post.imagem_post) }}"
-       alt="imagem do post" style="max-width:100%">
-{% endif %}
-      <p class="body">{{ post['body'] }}</p>
-    </article>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
-  {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
 {% endblock %}
